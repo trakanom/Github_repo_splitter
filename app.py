@@ -114,6 +114,23 @@ def clear_token():
     return "", 204
 
 
+@app.route("/preview", methods=["GET", "POST"])
+def preview():
+    if request.method == "POST":
+        # Process the user's selection and call main() with the selected subfolders
+        selected_subfolders = request.form.getlist("subfolder")
+        options = {
+            "require_preview": False,
+            "clear_original_repo": request.form.get("clear_original_repo") == "on",
+            "show_summary": request.form.get("show_summary") == "on",
+        }
+        result = main(request.form["repo_url"], **options)
+        return jsonify(result)
+
+    # Render the preview page
+    return render_template("preview.html", subfolders=find_subfolders())
+
+
 if __name__ == "__main__":
     import webbrowser
 
