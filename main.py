@@ -9,8 +9,6 @@ from dotenv import load_dotenv
 import argparse
 
 
-
-
 load_dotenv()
 
 GITHUB_ACCESS_TOKEN = os.getenv("GITHUB_ACCESS_TOKEN")
@@ -131,13 +129,26 @@ def generate_html_summary(subfolder_urls, pr_url):
     summary_file.write_text(html_content)
     return summary_file
 
-#Parses command line arguments 
+
+# Parses command line arguments
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Split a monolithic GitHub repository into separate repositories for each subfolder.")
+    parser = argparse.ArgumentParser(
+        description="Split a monolithic GitHub repository into separate repositories for each subfolder."
+    )
     parser.add_argument("repo_url", help="URL of the original GitHub repository")
     return parser.parse_args()
 
+
+def is_github_authorized():
+    return "GITHUB_ACCESS_TOKEN" in os.environ
+
+
 def main():
+    if not is_github_authorized():
+        print(
+            "Please visit http://localhost:8000/frontend to authorize this application on GitHub."
+        )
+        return
     args = parse_arguments()
     repo_url = args.repo_url
 

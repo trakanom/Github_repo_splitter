@@ -2,14 +2,22 @@ import os
 import requests
 from flask import Flask, request, redirect
 from dotenv import load_dotenv
-
-load_dotenv()
+from flask import render_template
+from flask import jsonify
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = "http://localhost:8000/callback"
 
 app = Flask(__name__)
+
+
+@app.route("/frontend")
+def frontend():
+    return render_template("index.html")
+
+
+load_dotenv()
 
 
 @app.route("/")
@@ -40,6 +48,22 @@ def callback():
         return "Authorization successful. You can now run the main.py script."
     else:
         return "Authorization failed."
+
+
+@app.route("/split-repo", methods=["POST"])
+def split_repo():
+    repo_url = request.args.get("url")
+    if not repo_url:
+        return "Error: Missing URL parameter", 400
+
+    try:
+        from main import main
+
+        pull_request_url = main(repo_url)
+        return jsonify({"pull_request_url": pull_request_url})
+    except Exception as e:
+        print(f"Error: {e}")
+        return "Error: Failed to split the repository", 500
 
 
 if __name__ == "__main__":
