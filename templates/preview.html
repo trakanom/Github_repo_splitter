@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview</title>
+</head>
+
+<body>
+    <h1>Select Repositories to Split</h1>
+    <form action="/preview" method="post">
+        <input type="hidden" name="repo_url" value="{{ request.args.get('repo_url') }}">
+        <ul>
+            {% for subfolder in subfolders %}
+            <li>
+                <input type="checkbox" name="subfolder" value="{{ subfolder }}" checked>
+                {{ subfolder }}
+            </li>
+            {% endfor %}
+        </ul>
+        <button type="button" onclick="checkAll(true)">Check All</button>
+        <button type="button" onclick="checkAll(false)">Uncheck All</button>
+        <br>
+        <br>
+        <label>
+            <input type="checkbox" name="clear_original_repo" checked>
+            Clear original repo
+        </label>
+        <br>
+        <label>
+            <input type="checkbox" name="show_summary" checked>
+            Show summary
+        </label>
+        <br>
+        <br>
+        <button type="submit">Split Selected Repositories</button>
+    </form>
+    <script>
+        function checkAll(checked) {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="subfolder"]');
+            for (const checkbox of checkboxes) {
+                checkbox.checked = checked;
+            }
+        }
+    </script>
+</body>
+
+</html>
