@@ -24,24 +24,25 @@ This Python script takes a GitHub repository and splits each subfolder into sepa
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file in the root folder of the project and add your GitHub personal access token and the URL of the original repository:
+4. Create a `.env` file in the root folder of the project and add your GitHub personal access token:
 
    ```
    GITHUB_ACCESS_TOKEN=your_personal_access_token
-   ORIGINAL_REPO_URL=https://github.com/your_username/original_repo.git
    ```
 
-   Replace `your_personal_access_token`, `your_username`, and `original_repo` with your actual information.
+   Replace `your_personal_access_token` with your actual information.
 
 ## Usage
 
 1. Make sure you are in the root folder of the project and the virtual environment is activated.
 
-2. Run the script:
+2. Run the script, providing the URL of the original repository as a command-line argument:
 
    ```
-   python script.py
+   python script.py https://github.com/your_username/original_repo.git
    ```
+
+   Replace `your_username` and `original_repo` with your actual information.
 
    The script will clone the original repository, create separate repositories for each subfolder, update the original repository's README.md, and create a pull request with the changes.
 
