@@ -144,8 +144,13 @@ def is_github_authorized():
 
 
 def main(
-    repo_url, require_preview=False, clear_original_repo=False, show_summary=False
+    repo_url,
+    subfolders=None,
+    require_preview=False,
+    clear_original_repo=False,
+    show_summary=False,
 ):
+
     if not is_github_authorized():
         raise Exception("GitHub authorization is required")
 
@@ -161,7 +166,8 @@ def main(
     repo = clone_and_checkout(repo_url, CLONE_DIR, DESTRUCTION_BRANCH)
 
     # Find all subfolders in the cloned repository
-    subfolders = find_subfolders()
+    if subfolders is None:
+        subfolders = find_subfolders()
 
     # Create a separate thread for each subfolder to handle the splitting process
     threads = []
