@@ -14,7 +14,6 @@ import argparse
 load_dotenv()
 
 GITHUB_ACCESS_TOKEN = os.getenv("GITHUB_ACCESS_TOKEN")
-ORIGINAL_REPO_URL = os.getenv("ORIGINAL_REPO_URL")
 CLONE_DIR = "clone_temp"
 DESTRUCTION_BRANCH = "destruction"
 
