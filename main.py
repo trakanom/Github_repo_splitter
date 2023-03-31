@@ -143,18 +143,18 @@ def is_github_authorized():
     return "GITHUB_ACCESS_TOKEN" in os.environ
 
 
-def main(repo_url):
+def main(
+    repo_url, require_preview=False, clear_original_repo=False, show_summary=False
+):
     if not is_github_authorized():
         raise Exception("GitHub authorization is required")
-
-    # Clone the original repository and checkout the destruction branch
 
     if not is_github_authorized():
         print(
             "Please visit http://localhost:8000/frontend to authorize this application on GitHub."
         )
         return
-    # args = parse_arguments()
+
     repo_url = repo_url
 
     # Clone the original repository and checkout the destruction branch
@@ -177,27 +177,37 @@ def main(repo_url):
     # Process the subfolders and obtain the URLs of the new repositories
     subfolder_urls = process_subfolders(repo, subfolders)
 
-    # Create a README.md file with a table of former contents for the original repository
-    create_readme(repo, subfolder_urls)
+    if require_preview:
+        # Implement your preview functionality here
+        pass
 
-    # Create a pull request with the changes made in the destruction branch
-    pr = create_pull_request(repo)
+    if clear_original_repo:
+        # Create a README.md file with a table of former contents for the original repository
+        create_readme(repo, subfolder_urls)
 
-    # Print the URL of the created pull request
-    print(f"Pull request created: {pr.html_url}")
-    # Return the URLs of the new repositories and the pull request
-    return {"subfolder_urls": subfolder_urls, "pull_request_url": pr.html_url}
+        # Create a pull request with the changes made in the destruction branch
+        pr = create_pull_request(repo)
+        pull_request_url = pr.html_url
+    else:
+        pull_request_url = None
+
+    if show_summary:
+        # Generate an HTML summary of the split repositories and the pull request
+        summary_file = generate_html_summary(subfolder_urls, pull_request_url)
+        # You can open the summary_file in a browser or return its content
+
+    return {"subfolder_urls": subfolder_urls, "pull_request_url": pull_request_url}
 
 
 # Update the __main__ block
-if __name__ == "__main__":
-    # import argparse
+# if __name__ == "__main__":
+# import argparse
 
-    # parser = argparse.ArgumentParser(
-    #     description="Split a monolithic GitHub repository into separate repositories for each subfolder."
-    # )
-    # parser.add_argument("repo_url", help="URL of the original GitHub repository")
-    # args = parser.parse_args()
+# parser = argparse.ArgumentParser(
+#     description="Split a monolithic GitHub repository into separate repositories for each subfolder."
+# )
+# parser.add_argument("repo_url", help="URL of the original GitHub repository")
+# args = parser.parse_args()
 
-    # result = main(args.repo_url)
-    # print(f"Pull request created: {result['pull_request_url']}")
+# result = main(args.repo_url)
+# print(f"Pull request created: {result['pull_request_url']}")
