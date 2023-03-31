@@ -10,22 +10,18 @@ from flask import (
 )
 from dotenv import load_dotenv
 
+load_dotenv()
+
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = "http://localhost:8000/callback"
 
 app = Flask(__name__)
-load_dotenv()
-
-
-@app.route("/frontend")
-def frontend():
-    return render_template("index.html")
 
 
 @app.route("/")
 def home():
-    return render_template("landing.html")
+    return render_template("index.html")
 
 
 @app.route("/connect-github")
@@ -53,9 +49,9 @@ def callback():
     if access_token:
         with open(".env", "a") as f:
             f.write(f"\nGITHUB_ACCESS_TOKEN={access_token}")
-        return "Authorization successful. You can now run the main.py script."
+        return redirect("/")  # Redirect to the landing page
     else:
-        return "Authorization failed."
+        return redirect("/connect-github")  # Redirect to the landing page
 
 
 @app.route("/split-repo", methods=["POST"])
