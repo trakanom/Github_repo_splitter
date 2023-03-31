@@ -49,7 +49,7 @@ def callback():
     if access_token:
         with open(".env", "a") as f:
             f.write(f"\nGITHUB_ACCESS_TOKEN={access_token}")
-        return redirect("/")  # Redirect to the landing page
+        return "<script>window.close();</script>"  # Close the new window
     else:
         return redirect("/connect-github")  # Redirect to the landing page
 
@@ -87,6 +87,31 @@ def summary():
 
     html_content = generate_html_summary(subfolder_urls, pull_request_url)
     return render_template_string(html_content)
+
+
+@app.route("/get-username")
+def get_username():
+    access_token = os.getenv("GITHUB_ACCESS_TOKEN")
+    if not access_token:
+        return jsonify({"username": None})
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get("https://api.github.com/user", headers=headers)
+    response_json = response.json()
+    return jsonify({"username": response_json.get("login")})
+
+
+@app.route("/clear-token", methods=["POST"])
+def clear_token():
+    with open(".env", "r") as file:
+        lines = file.readlines()
+
+    with open(".env", "w") as file:
+        for line in lines:
+            if not line.startswith("GITHUB_ACCESS_TOKEN"):
+                file.write(line)
+
+    return "", 204
 
 
 if __name__ == "__main__":
