@@ -154,8 +154,8 @@ def main(repo_url):
             "Please visit http://localhost:8000/frontend to authorize this application on GitHub."
         )
         return
-    args = parse_arguments()
-    repo_url = args.repo_url
+    # args = parse_arguments()
+    repo_url = repo_url
 
     # Clone the original repository and checkout the destruction branch
     repo = clone_and_checkout(repo_url, CLONE_DIR, DESTRUCTION_BRANCH)
@@ -191,13 +191,13 @@ def main(repo_url):
 
 # Update the __main__ block
 if __name__ == "__main__":
-    import argparse
+    # import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Split a monolithic GitHub repository into separate repositories for each subfolder."
-    )
-    parser.add_argument("repo_url", help="URL of the original GitHub repository")
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(
+    #     description="Split a monolithic GitHub repository into separate repositories for each subfolder."
+    # )
+    # parser.add_argument("repo_url", help="URL of the original GitHub repository")
+    # args = parser.parse_args()
 
-    result = main(args.repo_url)
-    print(f"Pull request created: {result['pull_request_url']}")
+    # result = main(args.repo_url)
+    # print(f"Pull request created: {result['pull_request_url']}")
