@@ -6,6 +6,9 @@ import webbrowser
 from git import Repo
 from github import Github
 from dotenv import load_dotenv
+import argparse
+
+
 
 
 load_dotenv()
@@ -129,10 +132,18 @@ def generate_html_summary(subfolder_urls, pr_url):
     summary_file.write_text(html_content)
     return summary_file
 
+#Parses command line arguments 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Split a monolithic GitHub repository into separate repositories for each subfolder.")
+    parser.add_argument("repo_url", help="URL of the original GitHub repository")
+    return parser.parse_args()
 
 def main():
+    args = parse_arguments()
+    repo_url = args.repo_url
+
     # Clone the original repository and checkout the destruction branch
-    repo = clone_and_checkout(ORIGINAL_REPO_URL, CLONE_DIR, DESTRUCTION_BRANCH)
+    repo = clone_and_checkout(repo_url, CLONE_DIR, DESTRUCTION_BRANCH)
 
     # Find all subfolders in the cloned repository
     subfolders = find_subfolders()
