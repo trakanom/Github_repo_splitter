@@ -9,8 +9,38 @@
 
 <body>
     <h1>Welcome to Repo Splitter</h1>
-    <p>Click the button below to authorize this application on GitHub:</p>
-    <a href="/"><button>Authorize on GitHub</button></a>
+    <p>Enter the repository URL below and click the "Split Repository" button to start the process:</p>
+    <form id="repo-form">
+        <input type="url" id="repo-url" placeholder="https://github.com/username/repo.git" required>
+        <button type="submit">Split Repository</button>
+    </form>
+    <p id="status"></p>
+    <script>
+        document.getElementById("repo-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const repoUrl = document.getElementById("repo-url").value;
+            const status = document.getElementById("status");
+            status.textContent = "Processing...";
+
+            try {
+                const response = await fetch(`/split-repo?url=${encodeURIComponent(repoUrl)}`, { method: "POST" });
+                if (response.ok) {
+                    const data = await response.json();
+                    status.textContent = `Pull request created: ${data.pull_request_url}`;
+
+                    const summaryUrl = new URL("/summary", window.location);
+                    summaryUrl.searchParams.append("pull_request_url", data.pull_request_url);
+                    data.subfolder_urls.forEach(url => summaryUrl.searchParams.append("subfolder_urls[]", url));
+                    window.open(summaryUrl.href);
+                } else {
+                    status.textContent = "Error: Failed to split the repository.";
+                }
+            } catch (error) {
+                console.error(error);
+                status.textContent = "Error: Failed to split the repository.";
+            }
+        });
+    </script>
 </body>
 
 </html>

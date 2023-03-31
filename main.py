@@ -143,7 +143,12 @@ def is_github_authorized():
     return "GITHUB_ACCESS_TOKEN" in os.environ
 
 
-def main():
+def main(repo_url):
+    if not is_github_authorized():
+        raise Exception("GitHub authorization is required")
+
+    # Clone the original repository and checkout the destruction branch
+
     if not is_github_authorized():
         print(
             "Please visit http://localhost:8000/frontend to authorize this application on GitHub."
@@ -180,13 +185,19 @@ def main():
 
     # Print the URL of the created pull request
     print(f"Pull request created: {pr.html_url}")
-
-    # Optionally launch an HTML summary of the operation
-    launch_summary = input("Would you like to launch an HTML summary? (y/n): ")
-    if launch_summary.lower() == "y":
-        summary_file = generate_html_summary(subfolder_urls, pr.html_url)
-        webbrowser.open(str(summary_file.resolve()))
+    # Return the URLs of the new repositories and the pull request
+    return {"subfolder_urls": subfolder_urls, "pull_request_url": pr.html_url}
 
 
+# Update the __main__ block
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Split a monolithic GitHub repository into separate repositories for each subfolder."
+    )
+    parser.add_argument("repo_url", help="URL of the original GitHub repository")
+    args = parser.parse_args()
+
+    result = main(args.repo_url)
+    print(f"Pull request created: {result['pull_request_url']}")
