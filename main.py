@@ -26,9 +26,33 @@ def clone_and_checkout(repo_url, clone_dir, branch):
 
 
 # Create a new GitHub repository with the specified folder name
-def create_new_repo(folder_name):
-    new_repo = user.create_repo(folder_name)
-    return new_repo
+def create_repo(token, repo_name):
+    g = Github(token)
+    user = g.get_user()
+
+    try:
+        user.create_repo(repo_name)
+        print(f'Repository "{repo_name}" created successfully.')
+    except Exception as e:
+        if "name already exists on this account" in str(e):
+            print(f'Repository "{repo_name}" already exists.')
+        else:
+            print("An unexpected error occurred:", e)
+
+
+def delete_repo(token, repo_name):
+    g = Github(token)
+    user = g.get_user()
+
+    try:
+        repo = user.get_repo(repo_name)
+        repo.delete()
+        print(f'Repository "{repo_name}" deleted successfully.')
+    except Exception as e:
+        if "Not Found" in str(e):
+            print(f'Repository "{repo_name}" not found.')
+        else:
+            print("An unexpected error occurred:", e)
 
 
 # Extract and push the specified subfolder to the new repository
@@ -57,7 +81,7 @@ def remove_subfolder_and_push(repo, folder_name):
 # Handle the specified subfolder by creating a new repository, pushing the subfolder to it,
 # and removing the subfolder from the original repository
 def handle_subfolder(repo, folder_name):
-    new_repo = create_new_repo(folder_name)
+    new_repo = create_repo(folder_name)
     extract_and_push_subfolder(repo, folder_name, new_repo)
     if verify_push(new_repo, folder_name):
         remove_subfolder_and_push(repo, folder_name)
