@@ -11,6 +11,7 @@ from flask import (
     render_template_string,
     session,
 )
+from main_script import *
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(16)  # Set the secret key for session data
 
 # Import find_subfolders function from main.py
-from main import find_subfolders
+from main_script import find_subfolders
 
 
 @app.route("/")
@@ -64,16 +65,16 @@ def callback():
 def split_repo():
     data = request.get_json()
     preview = data.get("preview", False)
-    repo_url = request.args.get("url")
+    repo_url = data.get("url")
     if not repo_url:
         return "Error: Missing URL parameter", 400
 
     try:
-        from main import main
+        from main_script import main
 
         if not preview:
             # Code to create repositories and push to GitHub
-            result = main(repo_url)
+            result = main_script(repo_url)
             return jsonify(
                 {
                     "pull_request_url": result["pull_request_url"],
@@ -82,7 +83,7 @@ def split_repo():
             )
         else:
             # Code to only generate a preview of the changes
-            preview_data = main(repo_url, preview=True)
+            preview_data = main_script(repo_url, preview=True)
             session["preview_data"] = preview_data
             return redirect("/preview")
     except Exception as e:
@@ -98,7 +99,7 @@ def summary():
     if not subfolder_urls or not pull_request_url:
         return "Error: Missing URL parameters", 400
 
-    from main import generate_html_summary
+    from main_script import generate_html_summary
 
     html_content = generate_html_summary(subfolder_urls, pull_request_url)
     return render_template_string(html_content)
@@ -129,27 +130,22 @@ def clear_token():
     return "", 204
 
 
-@app.route("/preview", methods=["GET", "POST"])
+@app.route("/preview", methods=["POST"])
 def preview():
-    if request.method == "POST":
-        # Process the user's selection and call main() with the selected subfolders
-        selected_subfolders = request.form.getlist("subfolder")
+    data = request.get_json()
+
+    if data:
+        repo_url = data.get("url")
+        selected_subfolders = data.get("subfolder", [])
         options = {
             "require_preview": False,
-            "clear_original_repo": request.form.get("clear_original_repo") == "on",
-            "show_summary": request.form.get("show_summary") == "on",
+            "clear_original_repo": data.get("clear_original_repo", False),
+            "show_summary": data.get("show_summary", False),
         }
-        result = main(request.form["repo_url"], **options)
+        result = main_script(repo_url, **options)
         return jsonify(result)
     else:
-        # Render the preview page with the data from the session
-        preview_data = session.get("preview_data")
-        if preview_data:
-            return render_template(
-                "preview.html", subfolders=preview_data["subfolders"]
-            )
-        else:
-            return "Error: Preview data not available", 400
+        return "Error: Preview data not available", 400
 
 
 if __name__ == "__main__":

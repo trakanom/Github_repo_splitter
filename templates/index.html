@@ -30,12 +30,13 @@
         <br />
         <input type="url" id="repo-url" placeholder="https://github.com/username/repo.git" required>
         <button id="start-split">Start splitting</button>
-
-        <!-- <button type="submit">Split Repository</button> -->
     </form>
     <p id="status"></p>
+    <div id="preview-container" style="display: none;">
+        <h2>Preview</h2>
+        <pre id="preview-content"></pre>
+    </div>
     <script src="/static/frontend.js"></script>
-
 </body>
 
 </html>

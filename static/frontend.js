@@ -8,6 +8,9 @@ async function fetchUsername() {
         } else {
             document.getElementById("user-status").innerHTML = "❌ Github not connected";
         }
+    } else {
+        console.error("Error fetching username");
+        document.getElementById("user-status").innerHTML = "❌ Github not connected";
     }
 }
 
@@ -30,47 +33,66 @@ document.getElementById("connect-github").addEventListener("click", async (event
     }
 });
 
-document.getElementById("start-split").addEventListener("click", () => {
+document.getElementById("repo-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const repoUrl = document.getElementById("repo-url").value;
+    const previewCheckbox = document.getElementById("require-preview");
+
+    if (previewCheckbox.checked) {
+        const response = await fetch('/preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: repoUrl }),
+        });
+
+
+        const previewData = await response.text();
+        document.getElementById("preview-content").innerText = previewData;
+        document.getElementById("preview-container").style.display = "block";
+    } else {
+        const status = document.getElementById("status");
+        status.textContent = "Processing...";
+
+        try {
+            const response = await fetch(`/split-repo?url=${encodeURIComponent(repoUrl)}`, { method: "POST" });
+            if (response.ok) {
+                const data = await response.json();
+                status.textContent = `Pull request created: ${data.pull_request_url}`;
+            } else {
+                status.textContent = "Error: Failed to split the repository.";
+            }
+        } catch (error) {
+            console.error(error);
+            status.textContent = "Error: Failed to split the repository.";
+        }
+    }
+});
+
+document.getElementById("start-split").addEventListener("click", async () => {
     const requirePreview = document.getElementById("require-preview").checked;
     const clearOriginalRepo = document.getElementById("clear-original-repo").checked;
     const showSummary = document.getElementById("show-summary").checked;
-
-    fetch("/split-repo", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            url: document.getElementById("repo-url").value,
-            requirePreview,
-            clearOriginalRepo,
-            showSummary,
-        }),
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-        });
-});
-
-
-document.getElementById("repo-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
     const repoUrl = document.getElementById("repo-url").value;
-    const status = document.getElementById("status");
-    status.textContent = "Processing...";
 
-    try {
-        const response = await fetch(`/split-repo?url=${encodeURIComponent(repoUrl)}`, { method: "POST" });
+    if (requirePreview) {
+        const response = await fetch("/preview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: repoUrl }),
+        });
+
         if (response.ok) {
-            const data = await response.json();
-            status.textContent = `Pull request created: ${data.pull_request_url}`;
+            const previewData = await response.text();
+            document.getElementById("preview-content").innerText = previewData;
+            document.getElementById("preview-container").style.display = "block";
         } else {
-            status.textContent = "Error: Failed to split the repository.";
+            console.error("Error fetching preview data");
         }
-    } catch (error) {
-        console.error(error);
-        status.textContent = "Error: Failed to split the repository.";
+    } else {
+        // Call the /split-repo endpoint or perform other actions when the checkbox is not checked
     }
 });
+
+
 fetchUsername();

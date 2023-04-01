@@ -7,7 +7,8 @@ from git import Repo
 from github import Github
 from dotenv import load_dotenv
 import argparse
-
+import shutil
+from flask import session
 
 load_dotenv()
 
@@ -167,9 +168,13 @@ def is_github_authorized():
     return "GITHUB_ACCESS_TOKEN" in os.environ
 
 
-def main(
+import shutil
+
+
+def main_script(
     repo_url,
     subfolders=None,
+    preview=False,
     require_preview=False,
     clear_original_repo=False,
     show_summary=False,
@@ -186,12 +191,24 @@ def main(
 
     repo_url = repo_url
 
+    # Remove the clone_temp directory if it exists
+    if os.path.exists(CLONE_DIR) and os.path.isdir(CLONE_DIR):
+        shutil.rmtree(CLONE_DIR)
+
     # Clone the original repository and checkout the destruction branch
     repo = clone_and_checkout(repo_url, CLONE_DIR, DESTRUCTION_BRANCH)
 
     # Find all subfolders in the cloned repository
     if subfolders is None:
         subfolders = find_subfolders()
+
+    if preview or require_preview:
+        # Store the subfolders in the session and retrieve them later in the splitting process
+        session["subfolders"] = subfolders
+        return
+
+    # Retrieve the subfolders from the session if they were set in the preview step
+    subfolders = session.get("subfolders", subfolders)
 
     # Create a separate thread for each subfolder to handle the splitting process
     threads = []
@@ -206,10 +223,6 @@ def main(
 
     # Process the subfolders and obtain the URLs of the new repositories
     subfolder_urls = process_subfolders(repo, subfolders)
-
-    if require_preview:
-        # Implement your preview functionality here
-        pass
 
     if clear_original_repo:
         # Create a README.md file with a table of former contents for the original repository
@@ -239,5 +252,5 @@ def main(
 # parser.add_argument("repo_url", help="URL of the original GitHub repository")
 # args = parser.parse_args()
 
-# result = main(args.repo_url)
+# result = main_script(args.repo_url)
 # print(f"Pull request created: {result['pull_request_url']}")
