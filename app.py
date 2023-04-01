@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+import uuid
 from flask import (
     Flask,
     request,
@@ -11,7 +12,6 @@ from flask import (
     session,
 )
 
-
 load_dotenv()
 
 CLIENT_ID = os.getenv("CLIENT_ID")
@@ -19,7 +19,10 @@ CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = "http://localhost:8000/callback"
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"
+app.secret_key = os.urandom(16)  # Set the secret key for session data
+
+# Import find_subfolders function from main.py
+from main import find_subfolders
 
 
 @app.route("/")
@@ -138,9 +141,15 @@ def preview():
         }
         result = main(request.form["repo_url"], **options)
         return jsonify(result)
-
-    # Render the preview page
-    return render_template("preview.html", subfolders=find_subfolders())
+    else:
+        # Render the preview page with the data from the session
+        preview_data = session.get("preview_data")
+        if preview_data:
+            return render_template(
+                "preview.html", subfolders=preview_data["subfolders"]
+            )
+        else:
+            return "Error: Preview data not available", 400
 
 
 if __name__ == "__main__":
