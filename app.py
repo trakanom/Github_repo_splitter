@@ -1,5 +1,6 @@
 import os
 import requests
+from dotenv import load_dotenv
 from flask import (
     Flask,
     request,
@@ -7,8 +8,9 @@ from flask import (
     render_template,
     jsonify,
     render_template_string,
+    session,
 )
-from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -17,6 +19,7 @@ CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = "http://localhost:8000/callback"
 
 app = Flask(__name__)
+app.secret_key = "your_secret_key"
 
 
 @app.route("/")
@@ -56,6 +59,8 @@ def callback():
 
 @app.route("/split-repo", methods=["POST"])
 def split_repo():
+    data = request.get_json()
+    preview = data.get("preview", False)
     repo_url = request.args.get("url")
     if not repo_url:
         return "Error: Missing URL parameter", 400
@@ -63,13 +68,20 @@ def split_repo():
     try:
         from main import main
 
-        result = main(repo_url)
-        return jsonify(
-            {
-                "pull_request_url": result["pull_request_url"],
-                "subfolder_urls": result["subfolder_urls"],
-            }
-        )
+        if not preview:
+            # Code to create repositories and push to GitHub
+            result = main(repo_url)
+            return jsonify(
+                {
+                    "pull_request_url": result["pull_request_url"],
+                    "subfolder_urls": result["subfolder_urls"],
+                }
+            )
+        else:
+            # Code to only generate a preview of the changes
+            preview_data = main(repo_url, preview=True)
+            session["preview_data"] = preview_data
+            return redirect("/preview")
     except Exception as e:
         print(f"Error: {e}")
         return "Error: Failed to split the repository", 500
