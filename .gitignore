@@ -1,5 +1,13 @@
-*.env
+# .gitignore
+.env
+__pycache__/
 clone_temp/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
 
 
 

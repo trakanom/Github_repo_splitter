@@ -1,0 +1,15 @@
+{
+  "name": "github-repo-splitter",
+  "version": "1.0.0",
+  "description": "An Electron app integrated with a Flask backend. This Python script takes a GitHub repository and splits each subfolder into separate repositories while maintaining the commit history. It also updates the original repository with a README.md file containing a \"Table of Former Contents\" with links to the newly created repositories.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^23.2.1",
+    "electron-is-dev": "^2.0.0"
+  }
+}

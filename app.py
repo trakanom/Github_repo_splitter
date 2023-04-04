@@ -11,7 +11,7 @@ from flask import (
     render_template_string,
     session,
 )
-from main_script import *
+from flask_app.main_script import *
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(16)  # Set the secret key for session data
 
 # Import find_subfolders function from main.py
-from main_script import find_subfolders
+from flask_app.main_script import find_subfolders
 
 
 @app.route("/")
@@ -70,7 +70,7 @@ def split_repo():
         return "Error: Missing URL parameter", 400
 
     try:
-        from main_script import main
+        from flask_app.main_script import main
 
         if not preview:
             # Code to create repositories and push to GitHub
@@ -99,7 +99,7 @@ def summary():
     if not subfolder_urls or not pull_request_url:
         return "Error: Missing URL parameters", 400
 
-    from main_script import generate_html_summary
+    from flask_app.main_script import generate_html_summary
 
     html_content = generate_html_summary(subfolder_urls, pull_request_url)
     return render_template_string(html_content)
@@ -114,7 +114,11 @@ def get_username():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get("https://api.github.com/user", headers=headers)
     response_json = response.json()
-    return jsonify({"username": response_json.get("login")})
+
+    if response.status_code == 200:
+        return jsonify({"username": response_json["login"]})
+    else:
+        return jsonify({"username": None, "error": response_json.get("message")})
 
 
 @app.route("/clear-token", methods=["POST"])
@@ -149,7 +153,4 @@ def preview():
 
 
 if __name__ == "__main__":
-    import webbrowser
-
-    webbrowser.open("http://localhost:8000")
-    app.run(port=8000)
+    app.run(debug=True, port=5000)
